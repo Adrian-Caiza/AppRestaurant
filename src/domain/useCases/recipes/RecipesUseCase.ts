@@ -118,12 +118,12 @@ export class RecipesUseCase {
 
             // Convertir la imagen a blob
             const response = await fetch(uri);
-            const blob = await response.blob();
+            const arrayBuffer = await response.arrayBuffer();
 
             // Subir a Supabase Storage
             const { data, error } = await supabase.storage
                 .from("recetas-fotos")
-                .upload(nombreArchivo, blob, {
+                .upload(nombreArchivo, arrayBuffer, {
                     contentType: `image/${extension}`,
                 });
 
