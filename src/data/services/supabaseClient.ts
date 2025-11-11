@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import "react-native-url-polyfill/auto";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Obtenemos las credenciales desde las variables de entorno
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -17,9 +18,9 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
         // No usamos AsyncStorage como pidió el profe
-        storage: undefined,
+        storage: AsyncStorage,
         autoRefreshToken: true,
-        persistSession: false,
+        persistSession: true,
         detectSessionInUrl: false,
     },
 });

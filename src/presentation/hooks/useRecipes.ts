@@ -13,6 +13,7 @@ export function useRecipes() {
     }, []);
 
     const cargarRecetas = async () => {
+        // ... (sin cambios)
         setCargando(true);
         const data = await recipesUseCase.obtenerRecetas();
         setRecetas(data);
@@ -20,6 +21,7 @@ export function useRecipes() {
     };
 
     const buscar = async (ingrediente: string) => {
+        // ... (sin cambios)
         setCargando(true);
         const data = await recipesUseCase.buscarPorIngrediente(ingrediente);
         setRecetas(data);
@@ -27,6 +29,7 @@ export function useRecipes() {
     };
 
     const crear = async (
+        // ... (sin cambios)
         titulo: string,
         descripcion: string,
         ingredientes: string[],
@@ -50,13 +53,15 @@ export function useRecipes() {
         id: string,
         titulo: string,
         descripcion: string,
-        ingredientes: string[]
+        ingredientes: string[],
+        imagenUri?: string // <-- ¡AQUÍ ESTÁ EL 5TO ARGUMENTO!
     ) => {
         const resultado = await recipesUseCase.actualizarReceta(
             id,
             titulo,
             descripcion,
-            ingredientes
+            ingredientes,
+            imagenUri 
         );
         if (resultado.success) {
             await cargarRecetas();
@@ -65,6 +70,7 @@ export function useRecipes() {
     };
 
     const eliminar = async (id: string) => {
+        // ... (sin cambios)
         const resultado = await recipesUseCase.eliminarReceta(id);
         if (resultado.success) {
             await cargarRecetas();
@@ -73,7 +79,14 @@ export function useRecipes() {
     };
 
     const seleccionarImagen = async () => {
+        // ... (sin cambios)
         return await recipesUseCase.seleccionarImagen();
+    };
+
+    // --- ¡NUEVA FUNCIÓN! ---
+    const tomarFoto = async () => {
+        // ... (sin cambios)
+        return await recipesUseCase.tomarFoto();
     };
 
     return {
@@ -82,8 +95,9 @@ export function useRecipes() {
         cargarRecetas,
         buscar,
         crear,
-        actualizar,
+        actualizar, // <-- Esta función ahora tiene 5 argumentos
         eliminar,
         seleccionarImagen,
+        tomarFoto, 
     };
 }

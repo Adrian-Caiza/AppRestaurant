@@ -38,6 +38,14 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      //Permisos para la cámara y galería
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "La app necesita acceso a tu galería para seleccionar fotos de recetas.",
+          "cameraPermission": "La app necesita acceso a tu cámara para tomar fotos para las recetas."
+        }
       ]
     ],
     "experiments": {

@@ -2,7 +2,7 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     ActivityIndicator,
-    Alert,
+    Alert, // <-- Importar Alert
     Image,
     ScrollView,
     StyleSheet,
@@ -23,7 +23,8 @@ import {
 
 export default function CrearRecetaScreen() {
     const { usuario, esChef } = useAuth();
-    const { crear, seleccionarImagen } = useRecipes();
+    // Importamos tomarFoto
+    const { crear, seleccionarImagen, tomarFoto } = useRecipes();
     const router = useRouter();
 
     const [titulo, setTitulo] = useState("");
@@ -34,6 +35,7 @@ export default function CrearRecetaScreen() {
     const [cargando, setCargando] = useState(false);
 
     const agregarIngrediente = () => {
+        // ... (sin cambios)
         if (ingrediente.trim()) {
             setIngredientes([...ingredientes, ingrediente.trim()]);
             setIngrediente("");
@@ -41,17 +43,40 @@ export default function CrearRecetaScreen() {
     };
 
     const quitarIngrediente = (index: number) => {
+        // ... (sin cambios)
         setIngredientes(ingredientes.filter((_, i) => i !== index));
     };
 
-    const handleSeleccionarImagen = async () => {
-        const uri = await seleccionarImagen();
-        if (uri) {
-            setImagenUri(uri);
-        }
+    // ¡ACTUALIZADO! Esta función ahora muestra un selector
+    const handleElegirFuenteImagen = () => {
+        Alert.alert(
+            "Seleccionar Imagen",
+            "Elige la fuente de tu imagen",
+            [
+                {
+                    text: "Galería",
+                    onPress: async () => {
+                        const uri = await seleccionarImagen();
+                        if (uri) setImagenUri(uri);
+                    },
+                },
+                {
+                    text: "Cámara",
+                    onPress: async () => {
+                        const uri = await tomarFoto();
+                        if (uri) setImagenUri(uri);
+                    },
+                },
+                {
+                    text: "Cancelar",
+                    style: "cancel",
+                },
+            ]
+        );
     };
 
     const handleCrear = async () => {
+        // ... (lógica de crear - sin cambios)
         if (!titulo || !descripcion || ingredientes.length === 0) {
             Alert.alert(
                 "Error",
@@ -89,6 +114,7 @@ export default function CrearRecetaScreen() {
     };
 
     if (!esChef) {
+        // ... (vista de no-chef - sin cambios)
         return (
             <View style={globalStyles.containerCentered}>
                 <Text style={styles.textoNoChef}>
@@ -104,6 +130,7 @@ export default function CrearRecetaScreen() {
     return (
         <ScrollView style={globalStyles.container}>
             <View style={globalStyles.contentPadding}>
+                {/* ... (Header, Inputs de Título y Descripción - sin cambios) */}
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.push("/(tabs)")}>
                         <Text style={styles.botonVolver}>← Volver</Text>
@@ -127,6 +154,7 @@ export default function CrearRecetaScreen() {
                     numberOfLines={4}
                 />
 
+                {/* ... (Lógica de Ingredientes - sin cambios) */}
                 <Text style={globalStyles.subtitle}>Ingredientes:</Text>
                 <View style={styles.contenedorIngrediente}>
                     <TextInput
@@ -161,7 +189,7 @@ export default function CrearRecetaScreen() {
 
                 <TouchableOpacity
                     style={[globalStyles.button, globalStyles.buttonSecondary]}
-                    onPress={handleSeleccionarImagen}
+                    onPress={handleElegirFuenteImagen} // <-- ¡ACTUALIZADO!
                 >
                     <Text style={globalStyles.buttonText}>
                         {imagenUri ? "📷 Cambiar Foto" : "📷 Agregar Foto"}

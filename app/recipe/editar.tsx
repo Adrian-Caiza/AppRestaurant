@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    Image, // <-- Importar Image
     ScrollView,
     StyleSheet,
     Text,
@@ -13,12 +14,18 @@ import {
 import { useAuth } from "../../src/presentation/hooks/useAuth";
 import { useRecipes } from "../../src/presentation/hooks/useRecipes";
 import { globalStyles } from "../../src/styles/globalStyles";
-import { colors, fontSize, spacing } from "../../src/styles/theme";
+import {
+    borderRadius, // <-- Importar borderRadius
+    colors,
+    fontSize,
+    spacing,
+} from "../../src/styles/theme";
 
 export default function EditarRecetaScreen() {
     const { id } = useLocalSearchParams();
     const { usuario } = useAuth();
-    const { recetas, actualizar } = useRecipes();
+    // Destructuramos seleccionarImagen del hook
+    const { recetas, actualizar, seleccionarImagen } = useRecipes();
     const router = useRouter();
 
     const receta = recetas.find((r) => r.id === id);
@@ -29,16 +36,21 @@ export default function EditarRecetaScreen() {
     const [ingredientes, setIngredientes] = useState<string[]>([]);
     const [cargando, setCargando] = useState(false);
 
+    // Nuevos estados para la imagen
+    const [imagenUri, setImagenUri] = useState<string | null>(null); // Nueva imagen seleccionada
+    const [imagenActualUrl, setImagenActualUrl] = useState<string | null>(null); // Imagen existente
+
     // Cargar datos de la receta al iniciar
     useEffect(() => {
         if (receta) {
             setTitulo(receta.titulo);
             setDescripcion(receta.descripcion);
             setIngredientes(receta.ingredientes);
+            setImagenActualUrl(receta.imagen_url || null); // Guardamos la URL actual
         }
     }, [receta]);
 
-    // Validar que el usuario es el dueño
+    // ... (Validaciones de permiso - sin cambios)
     if (!receta) {
         return (
             <View style={globalStyles.containerCentered}>
@@ -74,6 +86,14 @@ export default function EditarRecetaScreen() {
         setIngredientes(ingredientes.filter((_, i) => i !== index));
     };
 
+    // Función para manejar la selección de nueva imagen
+    const handleSeleccionarImagen = async () => {
+        const uri = await seleccionarImagen();
+        if (uri) {
+            setImagenUri(uri); // Guardamos la URI de la nueva imagen
+        }
+    };
+
     const handleGuardar = async () => {
         if (!titulo || !descripcion || ingredientes.length === 0) {
             Alert.alert("Error", "Completa todos los campos");
@@ -85,7 +105,8 @@ export default function EditarRecetaScreen() {
             receta.id,
             titulo,
             descripcion,
-            ingredientes
+            ingredientes,
+            imagenUri || undefined // <-- Pasamos la nueva URI de imagen
         );
         setCargando(false);
 
@@ -108,6 +129,7 @@ export default function EditarRecetaScreen() {
                     <Text style={globalStyles.title}>Editar Receta</Text>
                 </View>
 
+                {/* ... (Inputs de Título y Descripción - sin cambios) ... */}
                 <TextInput
                     style={globalStyles.input}
                     placeholder="Título de la receta"
@@ -124,6 +146,7 @@ export default function EditarRecetaScreen() {
                     numberOfLines={4}
                 />
 
+                {/* ... (Lógica de Ingredientes - sin cambios) ... */}
                 <Text style={globalStyles.subtitle}>Ingredientes:</Text>
                 <View style={styles.contenedorIngrediente}>
                     <TextInput
@@ -156,9 +179,32 @@ export default function EditarRecetaScreen() {
                     ))}
                 </View>
 
-                <Text style={styles.notaImagen}>
-                    💡 Nota: La imagen no se puede cambiar por ahora
-                </Text>
+                {/* --- Nueva sección de Imagen --- */}
+                <Text style={globalStyles.subtitle}>Imagen:</Text>
+
+                {/* Mostrar vista previa */}
+                {imagenUri || imagenActualUrl ? (
+                    <Image
+                        source={{ uri: imagenUri || imagenActualUrl! }} // Prioriza la nueva imagen
+                        style={styles.vistaPrevia}
+                    />
+                ) : (
+                    <View style={styles.imagenPlaceholder}>
+                        <Text style={globalStyles.textTertiary}>Sin imagen</Text>
+                    </View>
+                )}
+
+                <TouchableOpacity
+                    style={[
+                        globalStyles.button,
+                        globalStyles.buttonSecondary,
+                        styles.botonCambiarImagen,
+                    ]}
+                    onPress={handleSeleccionarImagen}
+                >
+                    <Text style={globalStyles.buttonText}>📷 Cambiar Imagen</Text>
+                </TouchableOpacity>
+                {/* --- Fin de sección de Imagen --- */}
 
                 <TouchableOpacity
                     style={[
@@ -226,11 +272,25 @@ const styles = StyleSheet.create({
         fontSize: fontSize.lg,
         fontWeight: "bold",
     },
-    notaImagen: {
-        fontSize: fontSize.sm,
-        color: colors.textSecondary,
+    // Eliminamos la nota de imagen y añadimos estilos para la vista previa
+    vistaPrevia: {
+        width: "100%",
+        height: 200,
+        borderRadius: borderRadius.md,
+        marginVertical: spacing.md,
+        backgroundColor: colors.borderLight,
+    },
+    imagenPlaceholder: {
+        width: "100%",
+        height: 150,
+        backgroundColor: colors.borderLight,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: borderRadius.md,
+        marginBottom: spacing.md,
+    },
+    botonCambiarImagen: {
         marginBottom: spacing.lg,
-        fontStyle: "italic",
     },
     botonGuardar: {
         padding: spacing.lg,

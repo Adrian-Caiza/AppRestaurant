@@ -3,8 +3,9 @@ import { supabase } from "../../../data/services/supabaseClient";
 import { Receta } from "../../models/Receta";
 
 export class RecipesUseCase {
-    // Obtener todas las recetas
+    // ... (Los métodos anteriores van aquí) ...
     async obtenerRecetas(): Promise<Receta[]> {
+        // ... (sin cambios)
         try {
             const { data, error } = await supabase
                 .from("recetas")
@@ -19,8 +20,8 @@ export class RecipesUseCase {
         }
     }
 
-    // Buscar recetas por ingrediente
     async buscarPorIngrediente(ingrediente: string): Promise<Receta[]> {
+        // ... (sin cambios)
         try {
             const { data, error } = await supabase
                 .from("recetas")
@@ -36,8 +37,8 @@ export class RecipesUseCase {
         }
     }
 
-    // Crear nueva receta
     async crearReceta(
+        // ... (sin cambios)
         titulo: string,
         descripcion: string,
         ingredientes: string[],
@@ -76,16 +77,31 @@ export class RecipesUseCase {
         id: string,
         titulo: string,
         descripcion: string,
-        ingredientes: string[]
+        ingredientes: string[],
+        imagenUri?: string // <-- ¡AQUÍ ESTÁ EL 5TO ARGUMENTO!
     ) {
         try {
+            let updateData: any = {
+                titulo,
+                descripcion,
+                ingredientes,
+            };
+
+            // Si se proporciona una nueva imagen, la subimos
+            if (imagenUri) {
+                console.log("🔵 Subiendo nueva imagen para actualización...");
+                const imagenUrl = await this.subirImagen(imagenUri);
+                if (imagenUrl) {
+                    updateData.imagen_url = imagenUrl; // <-- Añadimos la nueva URL a los datos
+                    console.log("✅ Nueva imagen subida:", imagenUrl);
+                } else {
+                    console.log("⚠️ Error al subir la nueva imagen, actualizando sin ella.");
+                }
+            }
+
             const { data, error } = await supabase
                 .from("recetas")
-                .update({
-                    titulo,
-                    descripcion,
-                    ingredientes,
-                })
+                .update(updateData) // Usamos el objeto dinámico
                 .eq("id", id)
                 .select()
                 .single();
@@ -99,6 +115,7 @@ export class RecipesUseCase {
 
     // Eliminar receta
     async eliminarReceta(id: string) {
+        // ... (sin cambios)
         try {
             const { error } = await supabase.from("recetas").delete().eq("id", id);
 
@@ -111,6 +128,7 @@ export class RecipesUseCase {
 
     // Subir imagen a Supabase Storage
     private async subirImagen(uri: string): Promise<string | null> {
+        // ... (sin cambios)
         try {
             // Obtener la extensión del archivo
             const extension = uri.split(".").pop();
@@ -143,6 +161,7 @@ export class RecipesUseCase {
 
     // Seleccionar imagen de la galería
     async seleccionarImagen(): Promise<string | null> {
+        // ... (sin cambios)
         try {
             // Pedir permisos
             const { status } =
@@ -168,6 +187,37 @@ export class RecipesUseCase {
             return null;
         } catch (error) {
             console.log("Error al seleccionar imagen:", error);
+            return null;
+        }
+    }
+
+    // --- ¡NUEVA FUNCIÓN! ---
+    // Tomar foto con la cámara
+    async tomarFoto(): Promise<string | null> {
+        // ... (sin cambios)
+        try {
+            // Pedir permisos de cámara
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+            if (status !== "granted") {
+                alert("Necesitamos permisos para usar la cámara");
+                return null;
+            }
+
+            // Abrir la cámara
+            const resultado = await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 0.8,
+            });
+
+            if (!resultado.canceled) {
+                return resultado.assets[0].uri;
+            }
+
+            return null;
+        } catch (error) {
+            console.log("Error al tomar foto:", error);
             return null;
         }
     }
