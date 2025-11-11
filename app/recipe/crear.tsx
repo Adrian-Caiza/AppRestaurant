@@ -37,7 +37,7 @@ export default function CrearRecetaScreen() {
     const agregarIngrediente = () => {
         // ... (sin cambios)
         if (ingrediente.trim()) {
-            setIngredientes([...ingredientes, ingrediente.trim()]);
+            setIngredientes([...ingredientes, ingrediente.trim().toLowerCase(),]);
             setIngrediente("");
         }
     };
@@ -123,6 +123,16 @@ export default function CrearRecetaScreen() {
                 <Text style={globalStyles.textSecondary}>
                     Crea una cuenta de chef para poder publicar recetas
                 </Text>
+                <TouchableOpacity
+                    style={[
+                        globalStyles.button,
+                        globalStyles.buttonPrimary,
+                        { marginTop: spacing.lg }, 
+                    ]}
+                    onPress={() => router.push("/(tabs)")} 
+                >
+                    <Text style={globalStyles.buttonText}> Volver al Home</Text>
+                </TouchableOpacity>
             </View>
         );
     }

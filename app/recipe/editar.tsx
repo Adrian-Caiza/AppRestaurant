@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
-    Image, // <-- Importar Image
+    Image, 
     ScrollView,
     StyleSheet,
     Text,
@@ -15,7 +15,7 @@ import { useAuth } from "../../src/presentation/hooks/useAuth";
 import { useRecipes } from "../../src/presentation/hooks/useRecipes";
 import { globalStyles } from "../../src/styles/globalStyles";
 import {
-    borderRadius, // <-- Importar borderRadius
+    borderRadius, 
     colors,
     fontSize,
     spacing,
@@ -45,7 +45,7 @@ export default function EditarRecetaScreen() {
         if (receta) {
             setTitulo(receta.titulo);
             setDescripcion(receta.descripcion);
-            setIngredientes(receta.ingredientes);
+            setIngredientes(receta.ingredientes.map((ing) => ing.toLowerCase()));
             setImagenActualUrl(receta.imagen_url || null); // Guardamos la URL actual
         }
     }, [receta]);
@@ -77,7 +77,7 @@ export default function EditarRecetaScreen() {
 
     const agregarIngrediente = () => {
         if (ingrediente.trim()) {
-            setIngredientes([...ingredientes, ingrediente.trim()]);
+            setIngredientes([...ingredientes, ingrediente.trim().toLowerCase(),]);
             setIngrediente("");
         }
     };
